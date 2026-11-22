@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /malika-voice.php
+Disallow: /malika-config.php
+Disallow: /index-old.html
+Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&yclid&gclid&fbclid /
+
+Sitemap: https://getyordamchi.uz/sitemap.xml
