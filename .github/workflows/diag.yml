@@ -5,10 +5,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          for s in 8.8.8.8 1.1.1.1 ns1.eskiz.uz ns2.eskiz.uz; do echo "== $s"; dig +short getyordamchi.uz A @$s; dig +short www.getyordamchi.uz @$s; done
-          dig +trace getyordamchi.uz A | tail -15
-          echo "== http apex"; curl -sSI -m 15 http://getyordamchi.uz/ | head -8
-          echo "== http www"; curl -sSI -m 15 http://www.getyordamchi.uz/ | head -8
-          echo "== https apex"; curl -sSI -m 15 https://getyordamchi.uz/ 2>&1 | head -5
-          echo "== direct github ip"; curl -sSI -m 15 -H 'Host: getyordamchi.uz' http://185.199.108.153/ | head -6
-          curl -s -m 15 http://getyordamchi.uz/ | grep -o '<title>[^<]*' | head -1
+          for d in getyordamchi.uz kasbpro.uz relax-mind.uz; do
+            echo "######## $d"
+            for s in ns1.eskiz.uz ns2.eskiz.uz; do
+              echo "== $s udp"; dig +norec +noall +answer +stats $d A @$s | grep -v '^;; \(WHEN\|MSG\)'
+              echo "== $s tcp"; dig +tcp +norec +short $d A @$s
+              echo "== $s SOA"; dig +norec +short $d SOA @$s
+              echo "== $s CAA"; dig +norec +short $d CAA @$s; dig +norec $d CAA @$s | grep status
+              echo "== $s AAAA"; dig +norec $d AAAA @$s | grep -E 'status|AAAA'
+              echo "== $s www"; dig +norec +short www.$d @$s
+            done
+            echo "== parent NS/DS"; dig +norec $d NS @ns6.uz | grep -A3 AUTHORITY; dig +short $d DS @8.8.8.8
+            echo "== resolvers"; for r in 8.8.8.8 1.1.1.1 9.9.9.9 208.67.222.222; do echo "$r: $(dig +short $d A @$r | tr '\n' ' ') | www $(dig +short www.$d @$r | head -1)"; done
+            echo "== https"; curl -sS -o /dev/null -w '%{http_code} %{ssl_verify_result}\n' -m 10 https://$d/ 2>&1 | tail -1
+          done
+          dig +short ns1.eskiz.uz; dig +short ns2.eskiz.uz
