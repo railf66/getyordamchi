@@ -1,0 +1,14 @@
+name: diag
+on: push
+jobs:
+  d:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for s in 8.8.8.8 1.1.1.1 ns1.eskiz.uz ns2.eskiz.uz; do echo "== $s"; dig +short getyordamchi.uz A @$s; dig +short www.getyordamchi.uz @$s; done
+          dig +trace getyordamchi.uz A | tail -15
+          echo "== http apex"; curl -sSI -m 15 http://getyordamchi.uz/ | head -8
+          echo "== http www"; curl -sSI -m 15 http://www.getyordamchi.uz/ | head -8
+          echo "== https apex"; curl -sSI -m 15 https://getyordamchi.uz/ 2>&1 | head -5
+          echo "== direct github ip"; curl -sSI -m 15 -H 'Host: getyordamchi.uz' http://185.199.108.153/ | head -6
+          curl -s -m 15 http://getyordamchi.uz/ | grep -o '<title>[^<]*' | head -1
